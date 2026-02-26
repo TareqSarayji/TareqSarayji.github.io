@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio — AI Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #08090c;
+  --border: rgba(255,255,255,0.07);
+  --text: #ddddd8;
+  --muted: #50505a;
+  --accent: #8ec5f5;
+  --accent2: #b8d8f8;
+  --glass-fill: rgba(255,255,255,0.05);
+  --glass-edge: rgba(255,255,255,0.12);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  overflow-x: hidden;
+}
+
+/* ─── GRAIN OVERLAY — entire page ─── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 500;
+  pointer-events: none;
+  opacity: 1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.68' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23grain)' opacity='0.14'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 180px 180px;
+  mix-blend-mode: overlay;
+}
+
+/* ─── NAV — LIQUID GLASS ─── */
+nav {
+  position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+  z-index: 400;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 36px; height: 52px;
+  width: min(900px, calc(100vw - 64px));
+  border-radius: 18px;
+
+  /* the core liquid glass effect */
+  background: rgba(14, 15, 22, 0.38);
+  backdrop-filter: blur(40px) saturate(200%) brightness(1.15) contrast(1.05);
+  -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(1.15) contrast(1.05);
+
+  /* layered borders for glass depth */
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow:
+    0 0 0 0.5px rgba(255,255,255,0.04) inset,
+    0 1px 0 rgba(255,255,255,0.12) inset,
+    0 -1px 0 rgba(0,0,0,0.4) inset,
+    0 8px 32px rgba(0,0,0,0.6),
+    0 2px 8px rgba(0,0,0,0.4);
+  isolation: isolate;
+}
+
+/* grain texture baked into nav */
+nav::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  overflow: hidden;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)' opacity='0.12'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+  mix-blend-mode: soft-light;
+  opacity: 0.8;
+}
+
+/* highlight lip at top */
+nav::after {
+  content: '';
+  position: absolute; top: 0; left: 8%; right: 8%; height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,255,255,0.22) 30%,
+    rgba(180,210,255,0.28) 60%,
+    transparent 100%
+  );
+  border-radius: 1px;
+  pointer-events: none;
+}
+nav > * { position: relative; z-index: 1; }
+
+.nav-logo {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: 13px; letter-spacing: 0.12em;
+  color: var(--text); text-decoration: none;
+}
+.nav-links { display: flex; gap: 36px; list-style: none; }
+.nav-links a {
+  color: var(--muted); text-decoration: none;
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--text); }
+
+/* ─── CANVAS BACKGROUND ─── */
+#bg-canvas {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+}
+
+/* ─── SECTIONS ─── */
+section { position: relative; z-index: 1; }
+
+/* ─── HOME ─── */
+#home {
+  min-height: 100vh;
+  display: flex; align-items: center;
+  padding: 120px 0 80px 10vw;
+}
+
+.hero-content { max-width: 680px; }
+
+.hero-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(58px, 7vw, 96px);
+  line-height: 0.92;
+  letter-spacing: -0.025em;
+  margin-bottom: 6px;
+}
+.hero-name .outline {
+  display: block;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(220,220,218,0.22);
+}
+
+.hero-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(15px, 1.8vw, 20px);
+  font-weight: 400;
+  color: var(--muted);
+  margin: 28px 0 20px;
+  letter-spacing: 0.04em;
+}
+.hero-title em { font-style: normal; color: var(--accent2); }
+
+.hero-desc {
+  max-width: 440px; line-height: 1.85;
+  color: #484852; font-size: 13px; margin-bottom: 52px;
+}
+
+.cta-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+
+/* ─── LIQUID GLASS BUTTON ─── */
+.btn-glass {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 13px 28px;
+  border-radius: 100px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+  text-decoration: none; color: var(--text);
+
+  background: rgba(142, 197, 245, 0.08);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(142, 197, 245, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.14),
+    inset 0 -1px 0 rgba(0,0,0,0.25),
+    0 6px 24px rgba(0,0,0,0.45);
+  overflow: hidden;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1),
+              border-color 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+}
+.btn-glass::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+  border-radius: 100px 100px 0 0;
+  pointer-events: none;
+}
+/* grain on button */
+.btn-glass::after {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23g)' opacity='0.1'/%3E%3C/svg%3E");
+  background-size: 100px 100px;
+  mix-blend-mode: overlay;
+  opacity: 0.6;
+  border-radius: inherit;
+}
+.btn-glass:hover {
+  transform: scale(1.03) translateY(-1px);
+  border-color: rgba(142, 197, 245, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.18),
+    inset 0 -1px 0 rgba(0,0,0,0.2),
+    0 10px 32px rgba(0,0,0,0.5),
+    0 0 0 1px rgba(142, 197, 245, 0.1);
+}
+
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 13px 0;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+  text-decoration: none; color: var(--muted);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  transition: color 0.2s, border-color 0.2s;
+}
+.btn-ghost:hover { color: var(--text); border-color: rgba(142,197,245,0.3); }
+
+/* ─── DIVIDER ─── */
+.divider {
+  height: 1px; background: var(--border); margin: 0 5vw;
+  position: relative; z-index: 1;
+}
+
+/* ─── SECTION HEADER ─── */
+.sec-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding: 80px 10vw 56px;
+}
+.sec-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(38px, 4.5vw, 64px);
+  font-weight: 800; letter-spacing: -0.022em; line-height: 1;
+}
+.sec-num { font-size: 10px; letter-spacing: 0.22em; color: var(--muted); }
+
+/* ─── EXPERIENCE ─── */
+#experience { padding-bottom: 100px; }
+
+.exp-list { padding: 0 10vw; }
+
+.exp-item {
+  display: grid; grid-template-columns: 190px 1fr;
+  gap: 40px; padding: 40px 0;
+  border-top: 1px solid var(--border);
+}
+.exp-item:last-child { border-bottom: 1px solid var(--border); }
+
+.exp-date { font-size: 10px; color: var(--muted); letter-spacing: 0.1em; margin-bottom: 8px; }
+.exp-company { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; }
+.exp-badge {
+  display: inline-block; margin-top: 10px;
+  font-size: 10px; color: var(--muted); letter-spacing: 0.1em;
+  border: 1px solid var(--border); border-radius: 100px;
+  padding: 3px 10px;
+}
+
+.exp-role {
+  font-family: 'Syne', sans-serif; font-size: 19px; font-weight: 600;
+  margin-bottom: 14px;
+  transition: color 0.2s;
+}
+.exp-item:hover .exp-role { color: var(--accent2); }
+.exp-desc { color: #424248; line-height: 1.8; font-size: 12.5px; max-width: 540px; margin-bottom: 18px; }
+.tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.tag {
+  font-size: 9.5px; letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--accent); border: 1px solid rgba(142,197,245,0.15);
+  padding: 3px 11px; border-radius: 100px;
+}
+
+/* ─── PROJECTS ─── */
+#projects { padding-bottom: 100px; }
+
+.projects-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--border);
+  margin: 0 5vw;
+  gap: 0;
+}
+
+.proj-card {
+  position: relative; padding: 38px;
+  background: var(--bg);
+  cursor: default; overflow: hidden;
+  display: flex; flex-direction: column;
+  min-height: 300px;
+  transition: background 0.35s;
+}
+/* Big grain texture on cards */
+.proj-card::after {
+  content: '';
+  position: absolute; inset: 0; z-index: 2;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)' opacity='0.22'/%3E%3C/svg%3E");
+  background-size: 110px 110px;
+  background-repeat: repeat;
+  mix-blend-mode: overlay;
+  opacity: 0.9;
+}
+/* Glass shimmer on hover — sits above grain */
+.proj-card::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 3;
+  background: linear-gradient(135deg,
+    rgba(142,197,245,0.04) 0%,
+    rgba(184,216,248,0.02) 40%,
+    transparent 70%
+  );
+  opacity: 0; transition: opacity 0.4s;
+}
+.proj-card:hover::before { opacity: 1; }
+.proj-card:hover { background: rgba(142,197,245,0.025); }
+
+/* borders between cells */
+.proj-card + .proj-card { border-left: 1px solid var(--border); }
+.proj-card:nth-child(4) { border-top: 1px solid var(--border); border-left: none; }
+.proj-card:nth-child(5) { border-top: 1px solid var(--border); border-left: 1px solid var(--border); }
+
+.proj-num { font-size: 10px; color: var(--muted); letter-spacing: 0.16em; margin-bottom: 28px; position: relative; z-index: 4; }
+.proj-name { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; line-height: 1.15; flex: 1; margin-bottom: 14px; position: relative; z-index: 4; }
+.proj-desc { font-size: 12px; color: #3e3e46; line-height: 1.75; margin-bottom: 26px; position: relative; z-index: 4; }
+.proj-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 18px; border-top: 1px solid var(--border); position: relative; z-index: 4; }
+.proj-stack { font-size: 9.5px; color: var(--muted); letter-spacing: 0.1em; }
+.proj-arrow {
+  width: 30px; height: 30px; border: 1px solid var(--border);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 13px; color: var(--muted);
+  transition: all 0.28s;
+}
+.proj-card:hover .proj-arrow {
+  border-color: var(--accent); color: var(--accent); transform: rotate(45deg);
+}
+
+.proj-card.feat {
+  grid-column: span 2;
+  background: rgba(255,255,255,0.015);
+  border-right: 1px solid var(--border);
+}
+.proj-card.feat .proj-name { font-size: 30px; }
+
+/* ─── STATUS ─── */
+.status-pill {
+  position: fixed; bottom: 28px; right: 40px; z-index: 400;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px; border-radius: 100px;
+  background: rgba(12,13,18,0.55);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+  font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted);
+}
+/* grain on status pill */
+.status-pill::before {
+  content: '';
+  position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='40'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='40' filter='url(%23g)' opacity='0.12'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay; opacity: 0.7;
+}
+.status-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent2);
+  animation: pulse 2.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.35;transform:scale(0.75)} }
+
+/* ─── FOOTER ─── */
+footer {
+  padding: 64px 10vw;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: flex-end; justify-content: space-between;
+  position: relative; z-index: 1;
+}
+.footer-headline {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(26px, 3.5vw, 44px);
+  font-weight: 700; line-height: 1.1; margin-bottom: 28px;
+}
+.footer-links {
+  display: flex; flex-direction: column; gap: 10px; text-align: right;
+}
+.footer-links a {
+  font-size: 11px; color: var(--muted); text-decoration: none;
+  letter-spacing: 0.1em; transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--text); }
+
+/* ─── ENTRANCE ANIMS ─── */
+.hero-content > * {
+  opacity: 0; transform: translateY(16px);
+  animation: fadeUp 0.65s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+.hero-name     { animation-delay: 0.1s; }
+.hero-title    { animation-delay: 0.32s; }
+.hero-desc     { animation-delay: 0.44s; }
+.cta-row       { animation-delay: 0.56s; }
+@keyframes fadeUp { to { opacity: 1; transform: none; } }
+
+.exp-item, .proj-card {
+  opacity: 0; transform: translateY(12px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.exp-item.vis, .proj-card.vis { opacity: 1; transform: none; }
+
+::selection { background: rgba(142,197,245,0.14); color: var(--text); }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<nav>
+  <a href="#home" class="nav-logo">Tareq.Sarayji</a>
+  <ul class="nav-links">
+    <li><a href="#home">Home</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#projects">Projects</a></li>
+  </ul>
+</nav>
+
+<!-- ── HOME ── -->
+<section id="home">
+  <div class="hero-content">
+    <h1 class="hero-name">
+      Tareq
+      <span class="outline">Sarayji</span>
+    </h1>
+    <p class="hero-title">AI Engineer &amp; <em>Applied Scientist</em></p>
+    <p class="hero-desc">Building intelligent systems at the intersection of machine learning and production infrastructure. Focused on LLM deployment, RAG architectures, and scalable AI pipelines.</p>
+    <div class="cta-row">
+      <a href="#projects" class="btn-glass">
+        View Work
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5h9M6.5 2l4.5 4.5L6.5 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="#experience" class="btn-ghost">
+        Experience
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5h9M6.5 2l4.5 4.5L6.5 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── EXPERIENCE ── -->
+<section id="experience">
+  <div class="sec-head">
+    <h2 class="sec-title">Experience</h2>
+    <span class="sec-num">01</span>
+  </div>
+  <div class="exp-list">
+
+    <div class="exp-item">
+      <div>
+        <div class="exp-date">October 2023 — Present</div>
+        <div class="exp-company">Anthropic</div>
+        <span class="exp-badge">Full-time</span>
+      </div>
+      <div>
+        <div class="exp-role">Senior AI Engineer</div>
+        <p class="exp-desc">Lead development of production LLM systems handling 10M+ daily requests. Architected the evaluation framework used across internal model releases. Built tooling for RLHF data pipelines and model fine-tuning workflows.</p>
+        <div class="tags">
+          <span class="tag">PyTorch</span><span class="tag">RLHF</span>
+          <span class="tag">Distributed Training</span><span class="tag">Python</span><span class="tag">AWS</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-item">
+      <div>
+        <div class="exp-date">2021 — 2023</div>
+        <div class="exp-company">OpenAI</div>
+        <span class="exp-badge">Full-time</span>
+      </div>
+      <div>
+        <div class="exp-role">ML Engineer</div>
+        <p class="exp-desc">Contributed to GPT-4 fine-tuning infrastructure. Developed internal tooling for model evaluation and safety benchmarks. Collaborated with the research team on scaling experiments and inference optimization.</p>
+        <div class="tags">
+          <span class="tag">Transformers</span><span class="tag">CUDA</span>
+          <span class="tag">Kubernetes</span><span class="tag">MLflow</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-item">
+      <div>
+        <div class="exp-date">2019 — 2021</div>
+        <div class="exp-company">Hugging Face</div>
+        <span class="exp-badge">Full-time</span>
+      </div>
+      <div>
+        <div class="exp-role">AI Research Engineer</div>
+        <p class="exp-desc">Core contributor to the Transformers library. Implemented and optimized attention mechanisms for long-context models. Maintained model cards and documentation for 200+ community models.</p>
+        <div class="tags">
+          <span class="tag">Transformers</span><span class="tag">NLP</span>
+          <span class="tag">Open Source</span><span class="tag">Python</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-item">
+      <div>
+        <div class="exp-date">2018 — 2019</div>
+        <div class="exp-company">Palantir</div>
+        <span class="exp-badge">Contract</span>
+      </div>
+      <div>
+        <div class="exp-role">Data Engineer</div>
+        <p class="exp-desc">Built ETL pipelines for government defense analytics. Implemented anomaly detection on time-series sensor data. Delivered ML solutions for 3 major enterprise contracts.</p>
+        <div class="tags">
+          <span class="tag">Spark</span><span class="tag">Time Series</span><span class="tag">Scala</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── PROJECTS ── -->
+<section id="projects">
+  <div class="sec-head">
+    <h2 class="sec-title">Projects</h2>
+    <span class="sec-num">02</span>
+  </div>
+  <div class="projects-grid">
+
+    <div class="proj-card feat">
+      <div class="proj-num">001 — Featured</div>
+      <div class="proj-name">NeuralRAG<br>Framework</div>
+      <p class="proj-desc">Production-grade Retrieval Augmented Generation system with hybrid search, reranking, and streaming inference. Handles 50K+ daily queries with sub-200ms latency. Open source, 2.4K GitHub stars.</p>
+      <div class="proj-footer">
+        <span class="proj-stack">Python · Qdrant · FastAPI · LangChain</span>
+        <div class="proj-arrow">↗</div>
+      </div>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-num">002</div>
+      <div class="proj-name">Eval Suite</div>
+      <p class="proj-desc">Automated LLM evaluation pipeline with custom metrics, adversarial test sets, and CI/CD integration for model regression testing.</p>
+      <div class="proj-footer">
+        <span class="proj-stack">Python · Docker</span>
+        <div class="proj-arrow">↗</div>
+      </div>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-num">003</div>
+      <div class="proj-name">Tensor Profiler</div>
+      <p class="proj-desc">Real-time GPU profiling for PyTorch training runs. Visualizes memory, kernel efficiency, and bottlenecks with interactive flame graphs.</p>
+      <div class="proj-footer">
+        <span class="proj-stack">C++ · CUDA · React</span>
+        <div class="proj-arrow">↗</div>
+      </div>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-num">004</div>
+      <div class="proj-name">LoRA Manager</div>
+      <p class="proj-desc">CLI and web UI for managing fine-tuned adapter weights. Supports merging, quantization, and deployment to vLLM endpoints.</p>
+      <div class="proj-footer">
+        <span class="proj-stack">Python · vLLM · Next.js</span>
+        <div class="proj-arrow">↗</div>
+      </div>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-num">005</div>
+      <div class="proj-name">Context Forge</div>
+      <p class="proj-desc">Intelligent context window management. Dynamically compresses, summarizes, and prioritizes conversation history for long-horizon agents.</p>
+      <div class="proj-footer">
+        <span class="proj-stack">Python · Anthropic API</span>
+        <div class="proj-arrow">↗</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div>
+    <div class="footer-headline">Let's build<br>something.</div>
+    <a href="mailto:alex@chen.dev" class="btn-glass">
+      Get in touch
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5h9M6.5 2l4.5 4.5L6.5 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </div>
+  <div class="footer-links">
+    <a href="#">GitHub</a>
+    <a href="#">LinkedIn</a>
+    <a href="#">Twitter</a>
+    <a href="#">Resume ↗</a>
+  </div>
+</footer>
+
+<!-- <div class="status-pill">
+  <span class="status-dot"></span>
+  Tareq Sarayji
+</div> -->
+
+<script>
+// ── CANVAS: LIQUID GLASS BACKGROUND ──
+const canvas = document.getElementById('bg-canvas');
+const ctx    = canvas.getContext('2d');
+
+function resize() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// Animated glass blobs + grain rendered in canvas
+class Blob {
+  constructor() { this.init(); }
+  init() {
+    const W = canvas.width, H = canvas.height;
+    this.x     = Math.random() * W;
+    this.y     = Math.random() * H;
+    this.bx    = this.x;
+    this.by    = this.y;
+    this.r     = 140 + Math.random() * 260;
+    this.vx    = (Math.random() - 0.5) * 0.15;
+    this.vy    = (Math.random() - 0.5) * 0.12;
+    this.phase = Math.random() * Math.PI * 2;
+    this.speed = 0.0025 + Math.random() * 0.003;
+    this.baseA = 0.022 + Math.random() * 0.032;
+    this.alpha = this.baseA;
+    this.targetA = this.baseA;
+    // cool steel-blue palette
+    const H_vals = [212, 218, 222, 208, 225];
+    this.hue = H_vals[Math.floor(Math.random() * H_vals.length)];
+    this.sat = 28 + Math.random() * 22;
+    this.lum = 55 + Math.random() * 18;
+    this.baseSat = this.sat;
+    this.baseLum = this.lum;
+    this.targetSat = this.sat;
+    this.targetLum = this.lum;
+  }
+  update(mx, my) {
+    this.phase += this.speed;
+    this.x = this.bx + Math.sin(this.phase) * 55;
+    this.y = this.by + Math.cos(this.phase * 0.73) * 38;
+    this.bx += this.vx;
+    this.by += this.vy;
+    const W = canvas.width, H = canvas.height;
+    if (this.bx < -this.r) this.bx = W + this.r;
+    if (this.bx > W + this.r) this.bx = -this.r;
+    if (this.by < -this.r) this.by = H + this.r;
+    if (this.by > H + this.r) this.by = -this.r;
+    // mouse proximity — strong visible reaction
+    if (mx !== null) {
+      const d = Math.hypot(this.x - mx, this.y - (my + scrollY));
+      const prox = Math.max(0, 1 - d / 420);
+      this.targetA   = this.baseA + prox * 0.18;
+      this.targetSat = this.baseSat + prox * 40;
+      this.targetLum = this.baseLum + prox * 18;
+    } else {
+      this.targetA   = this.baseA;
+      this.targetSat = this.baseSat;
+      this.targetLum = this.baseLum;
+    }
+    this.alpha += (this.targetA   - this.alpha) * 0.07;
+    this.sat   += (this.targetSat - this.sat)   * 0.07;
+    this.lum   += (this.targetLum - this.lum)   * 0.07;
+  }
+  draw() {
+    const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r);
+    g.addColorStop(0,    `hsla(${this.hue},${this.sat}%,${this.lum}%,${this.alpha})`);
+    g.addColorStop(0.3,  `hsla(${this.hue},${this.sat - 6}%,${this.lum - 6}%,${this.alpha * 0.65})`);
+    g.addColorStop(0.65, `hsla(${this.hue},${this.sat - 12}%,${this.lum - 12}%,${this.alpha * 0.22})`);
+    g.addColorStop(1,    `hsla(${this.hue},${this.sat}%,${this.lum}%,0)`);
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+    ctx.fillStyle = g;
+    ctx.fill();
+  }
+}
+
+// Per-frame grain — the secret sauce for macOS-like texture
+// We'll draw static noise tiles that change slowly
+let grainTime = 0;
+const grainCanvas = document.createElement('canvas');
+grainCanvas.width = grainCanvas.height = 256;
+const gctx = grainCanvas.getContext('2d');
+
+function updateGrain() {
+  const imgData = gctx.createImageData(256, 256);
+  const d = imgData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const v = Math.random() * 255 | 0;
+    d[i] = d[i+1] = d[i+2] = v;
+    d[i+3] = 32; // punchy grain alpha
+  }
+  gctx.putImageData(imgData, 0, 0);
+}
+// update grain every 2 frames for living texture
+let gFrame = 0;
+updateGrain();
+
+// Connection filaments between nearby blobs
+function drawFilaments(blobs) {
+  ctx.save();
+  for (let i = 0; i < blobs.length; i++) {
+    for (let j = i + 1; j < blobs.length; j++) {
+      const a = blobs[i], b = blobs[j];
+      const d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (d < 300) {
+        const t = 1 - d / 300;
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        // slight curve
+        const mx2 = (a.x + b.x) / 2 + (Math.random() - 0.5) * 20;
+        const my2 = (a.y + b.y) / 2 + (Math.random() - 0.5) * 20;
+        ctx.quadraticCurveTo(mx2, my2, b.x, b.y);
+        ctx.strokeStyle = `rgba(160,200,240,${t * 0.022})`;
+        ctx.lineWidth = 0.4;
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.restore();
+}
+
+const BLOBS = Array.from({ length: 24 }, () => new Blob());
+
+let mx = null, my = null;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+document.addEventListener('mouseleave', () => { mx = null; my = null; });
+
+let scrollY = 0;
+window.addEventListener('scroll', () => { scrollY = window.scrollY; });
+
+function render() {
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  // Rich dark base
+  const bg = ctx.createLinearGradient(0, 0, W * 0.7, H);
+  bg.addColorStop(0,   '#09090e');
+  bg.addColorStop(0.4, '#08090c');
+  bg.addColorStop(1,   '#060608');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Subtle radial vignette
+  const vig = ctx.createRadialGradient(W * 0.5, H * 0.4, H * 0.1, W * 0.5, H * 0.5, H * 0.9);
+  vig.addColorStop(0, 'rgba(20,22,34,0)');
+  vig.addColorStop(1, 'rgba(0,0,0,0.65)');
+  ctx.fillStyle = vig;
+  ctx.fillRect(0, 0, W, H);
+
+  // Blobs with screen blend
+  ctx.globalCompositeOperation = 'screen';
+  BLOBS.forEach(b => { b.update(mx, my); b.draw(); });
+  ctx.globalCompositeOperation = 'source-over';
+
+  // Filaments
+  drawFilaments(BLOBS);
+
+  // Animated per-frame grain overlay
+  gFrame++;
+  if (gFrame % 2 === 0) updateGrain();
+  ctx.save();
+  ctx.globalAlpha = 0.82;
+  ctx.globalCompositeOperation = 'overlay';
+  const pat = ctx.createPattern(grainCanvas, 'repeat');
+  if (pat) {
+    ctx.fillStyle = pat;
+    ctx.fillRect(0, 0, W, H);
+  }
+  ctx.restore();
+
+  // Horizontal scan-lines for depth texture
+  ctx.save();
+  ctx.globalAlpha = 0.022;
+  ctx.globalCompositeOperation = 'overlay';
+  for (let y2 = 0; y2 < H; y2 += 3) {
+    ctx.fillStyle = 'rgba(200,220,255,1)';
+    ctx.fillRect(0, y2, W, 1);
+  }
+  ctx.restore();
+
+  requestAnimationFrame(render);
+}
+render();
+
+// ── INTERSECTION OBSERVER ──
+const io = new IntersectionObserver(entries => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('vis'), 0);
+    }
+  });
+}, { threshold: 0.08 });
+
+document.querySelectorAll('.exp-item, .proj-card').forEach((el, i) => {
+  el.style.transitionDelay = `${i * 0.06}s`;
+  io.observe(el);
+});
+</script>
+</body>
+</html>
